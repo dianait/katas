@@ -17,6 +17,8 @@ katas/
 
 ### 1. 📋 [Expenses Report](ExpensesReport/README.md)
 
+**Kata Original:** [christianhujer/expensereport](https://github.com/christianhujer/expensereport)
+
 **Problema:** Sistema de reportes de gastos con múltiples code smells
 
 **Solución:** Refactorización completa aplicando:
@@ -35,6 +37,8 @@ katas/
 ---
 
 ### 2. 🏰 [Gilded Rose](Gilded%20Rose/README.md)
+
+**Kata Original:** [emilybache/GildedRose-Refactoring-Kata](https://github.com/emilybache/GildedRose-Refactoring-Kata)
 
 **Problema:** Sistema de gestión de inventario con condicionales complejos
 
@@ -62,3 +66,7 @@ katas/
 ## 📝 Licencia
 
 Este proyecto está bajo la licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
+
+---
+
+**¡Disfruta explorando las katas y aprendiendo técnicas de refactorización efectivas! 🚀**
