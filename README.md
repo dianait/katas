@@ -62,7 +62,3 @@ katas/
 ## 📝 Licencia
 
 Este proyecto está bajo la licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
-
----
-
-**¡Disfruta explorando las katas y aprendiendo técnicas de refactorización efectivas! 🚀**
