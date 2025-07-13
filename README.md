@@ -76,7 +76,7 @@ katas/
 | -------------- | ---------------- | ------------ | ---------------------- | ------------------------ |
 | ExpensesReport | 87               | 7 archivos   | 6                      | Arquitectura Hexagonal   |
 | Gilded Rose    | 80+              | 13 tests     | 5+                     | Strategy Pattern         |
-| Season Detector| 60+              | 5 test files | 3                      | Extracción de Generadores|
+| Season Detector| 60+              | 5 test       | 3                      | Extracción de Generadores|
 
 ## 📝 Licencia
 Este proyecto está bajo la licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
