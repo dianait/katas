@@ -1,0 +1,224 @@
+# Season Detector - Kata de Programación
+
+Una librería Swift para detectar automáticamente la estación del año basándose en una fecha dada.
+
+> **Kata inspirada en el curso:** [Testing: Introduction and Best Practices](https://codely.com/en/courses/testing-introduction-and-best-practices-o9me) de *CodelyTV*
+
+## 🎯 Objetivo de la Kata
+
+El objetivo principal es crear un caso de uso que determine si una fecha pertenece a una estación específica. Si la fecha no pertenece a ninguna estación conocida, debe lanzar un error.
+
+## 📋 Requisitos
+
+- ✅ Detectar la estación (primavera, verano, otoño, invierno) para cualquier fecha
+- ✅ Lanzar error si la fecha no pertenece a ninguna estación
+- ✅ Manejar correctamente el caso especial del invierno (que cruza el año)
+- ✅ Tests exhaustivos con fechas fijas y aleatorias
+
+## 🏗️ Arquitectura de la Solución
+
+### Componentes Principales
+
+#### 1. `Season` - Enum de Estaciones
+```swift
+enum Season: String {
+    case spring, summer, autumn, winter
+}
+```
+
+#### 2. `SeasonError` - Manejo de Errores
+```swift
+enum SeasonError: Error {
+    case notFound
+}
+```
+
+#### 3. `SeasonData` - Modelo de Datos
+```swift
+struct SeasonData {
+    let season: Season
+    let startMonth: Int
+    let startDay: Int
+    let endMonth: Int
+    let endDay: Int
+    
+    // Lógica de contención de fechas
+    func contains(monthDay: Int) -> Bool
+}
+```
+
+#### 4. `SeasonResolver` - Resolver Principal
+```swift
+struct SeasonResolver {
+    func getSeason(from date: Date) throws -> Season
+}
+```
+
+## 📅 Definición de Estaciones (Hemisferio Norte)
+
+| Estación | Inicio | Fin |
+|----------|--------|-----|
+| **Primavera** | 21 Marzo | 20 Junio |
+| **Verano** | 21 Junio | 20 Septiembre |
+| **Otoño** | 21 Septiembre | 20 Diciembre |
+| **Invierno** | 21 Diciembre | 20 Marzo (siguiente año) |
+
+## 🧠 Decisiones de Diseño
+
+### 1. ¿Por qué `struct` en lugar de `class`?
+- **Inmutabilidad**: Los datos de las estaciones no cambian
+- **Eficiencia**: Mejor rendimiento en memoria
+- **Semántica de valor**: Una estación representa un valor, no un objeto
+- **Thread-safe**: Las structs son inherentemente seguras para concurrencia
+
+### 2. Algoritmo de Detección
+**Conversión a valor numérico**: `mes * 100 + día`
+- Marzo 21 = 3 * 100 + 21 = 321
+- Diciembre 25 = 12 * 100 + 25 = 1225
+
+**Ventajas**:
+- Comparaciones simples y eficientes
+- No importa el año
+- Fácil de entender y mantener
+
+### 3. Manejo del Invierno
+El invierno es especial porque cruza el cambio de año:
+```swift
+if season == .winter {
+    return monthDay >= startValue || monthDay <= endValue
+} else {
+    return monthDay >= startValue && monthDay <= endValue
+}
+```
+
+### 4. Extracción de Números Mágicos
+**Antes** (números mágicos):
+```swift
+switch monthDay {
+case 321...620: return .spring
+case 621...920: return .summer
+// ...
+}
+```
+
+**Después** (datos estructurados):
+```swift
+let seasons: [SeasonData] = [
+    SeasonData(season: .spring, startMonth: 3, startDay: 21, endMonth: 6, endDay: 20),
+    // ...
+]
+```
+
+## 🧪 Estrategia de Testing
+
+### Tests con Fechas Fijas
+- **Fechas límite**: Inicio y fin de cada estación
+- **Fechas intermedias**: Puntos medios de cada estación
+- **Edge cases**: Verificación de transiciones
+
+### Tests con Fechas Aleatorias
+Para hacer los tests más robustos, se extrajo la generación de fechas aleatorias a un archivo separado `RandomDateGenerator`:
+
+#### Generador Extraído (`RandomDateGenerator.swift`)
+```swift
+struct RandomDateGenerator {
+    static func randomSpringDate() -> Date {
+        let month = Int.random(in: 3...6)
+        let day: Int
+        switch month {
+        case 3: day = Int.random(in: 21...31)
+        case 4, 5: day = Int.random(in: 1...30)
+        case 6: day = Int.random(in: 1...20)
+        default: day = 15
+        }
+        return createDate(month: month, day: day)
+    }
+    // ... métodos similares para summer, autumn, winter
+}
+```
+
+#### Ventajas de la Extracción
+- **Reutilizable**: Otros tests pueden usar el mismo generador
+- **Mantenible**: Cambios de lógica en un solo lugar
+- **Limpieza**: Tests más enfocados y legibles
+- **Single Responsibility**: Separación clara de responsabilidades
+
+#### Tests Implementados
+- `testRandomSpringDates()`: 5 fechas aleatorias de primavera
+- `testRandomSummerDates()`: 5 fechas aleatorias de verano
+- `testRandomAutumnDates()`: 5 fechas aleatorias de otoño
+- `testRandomWinterDates()`: 5 fechas aleatorias de invierno
+- `testAllSeasonsInSingleTest()`: Test combinado con fechas fijas
+
+## 🚀 Uso
+
+```swift
+let resolver = SeasonResolver()
+
+do {
+    let season = try resolver.getSeason(from: Date())
+    print("Estación actual: \(season.rawValue)")
+} catch SeasonError.notFound {
+    print("No se pudo determinar la estación")
+} catch {
+    print("Error inesperado: \(error)")
+}
+```
+
+## 📦 Instalación
+
+### Como Librería Estática en Xcode
+1. Crear nuevo proyecto → Static Library
+2. Añadir los archivos fuente
+3. Crear target de tests para XCTest
+
+### Estructura de Archivos
+```
+SeasonDetector/
+├── Sources/
+│   ├── Season.swift
+│   ├── SeasonData.swift
+│   └── SeasonResolver.swift
+└── Tests/
+    ├── SeasonResolverTests.swift
+    └── RandomDateGenerator.swift
+```
+
+## 🔄 Evolución del Código
+
+### Iteración 1: Implementación Básica
+- Switch con números mágicos
+- Lógica simple pero poco mantenible
+
+### Iteración 2: Refactorización
+- Extracción de datos a estructuras
+- Eliminación de números mágicos
+- Mejor separación de responsabilidades
+
+### Iteración 3: Tests Robustos y Refactoring
+- Extracción del generador de fechas aleatorias a archivo separado
+- Tests simplificados con 5 fechas aleatorias por estación
+- Mejor organización del código de testing
+- Mantenimiento de tests fijos para casos límite
+
+## 🎯 Aprendizajes Clave
+
+1. **Refactoring progresivo**: Empezar simple y mejorar iterativamente
+2. **Eliminación de números mágicos**: Hace el código más mantenible
+3. **Tests aleatorios**: Complementan los tests fijos para mayor robustez
+4. **Separación de responsabilidades**: Extraer generadores a archivos separados
+5. **Manejo de casos especiales**: El invierno requiere lógica particular
+6. **Diseño de APIs**: Usar `throws` para casos de error claros
+
+## 🤝 Contribución
+
+Esta kata demuestra buenas prácticas de:
+- Diseño de APIs en Swift
+- Testing exhaustivo
+- Refactoring de código legacy
+- Manejo de casos edge
+- Documentación clara
+
+---
+
+*Kata desarrollada como ejercicio de programación y diseño de software en Swift, inspirada en el curso [Testing: Introduction and Best Practices](https://codely.com/en/courses/testing-introduction-and-best-practices-o9me) de Codely.*
